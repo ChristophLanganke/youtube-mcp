@@ -148,8 +148,11 @@ export async function runInteractiveLogin(): Promise<StoredToken> {
 
   return new Promise<StoredToken>((resolve, reject) => {
     const server = http.createServer(async (req, res) => {
-      const url = new URL(req.url ?? '/', `http://127.0.0.1`);
-      if (url.pathname !== '/callback') {
+      const url = new URL(req.url ?? '/', 'http://127.0.0.1');
+
+      // Google redirects to the loopback root, so accept any path and key off the
+      // query instead. Keeps incidental hits like /favicon.ico from ending the flow.
+      if (!url.searchParams.has('code') && !url.searchParams.has('error')) {
         res.writeHead(404).end('Not found');
         return;
       }
@@ -193,7 +196,7 @@ export async function runInteractiveLogin(): Promise<StoredToken> {
           code,
           code_verifier: codeVerifier,
           grant_type: 'authorization_code',
-          redirect_uri: `http://127.0.0.1:${port}/callback`,
+          redirect_uri: `http://127.0.0.1:${port}`,
         });
 
         if (!data.refresh_token) {
@@ -235,7 +238,7 @@ export async function runInteractiveLogin(): Promise<StoredToken> {
 
       const authUrl = new URL(AUTH_ENDPOINT);
       authUrl.searchParams.set('client_id', clientId);
-      authUrl.searchParams.set('redirect_uri', `http://127.0.0.1:${port}/callback`);
+      authUrl.searchParams.set('redirect_uri', `http://127.0.0.1:${port}`);
       authUrl.searchParams.set('response_type', 'code');
       authUrl.searchParams.set('scope', SCOPES.join(' '));
       authUrl.searchParams.set('access_type', 'offline');
@@ -244,7 +247,7 @@ export async function runInteractiveLogin(): Promise<StoredToken> {
       authUrl.searchParams.set('code_challenge', codeChallenge);
       authUrl.searchParams.set('code_challenge_method', 'S256');
 
-      console.log(`Listening on http://127.0.0.1:${port}/callback`);
+      console.log(`Listening on http://127.0.0.1:${port}`);
       console.log(`Opening browser for Google consent...\n${authUrl.toString()}\n`);
       openBrowser(authUrl.toString());
     });
