@@ -39,13 +39,20 @@ At this point transcripts already work. Sign-in is only needed for the account t
 
 ### 2. Google Cloud credentials (for account access)
 
+The old "OAuth consent screen" page is gone — Google replaced it with the **Google Auth Platform**
+section. German console labels are given in parentheses.
+
 1. Open the [Google Cloud Console](https://console.cloud.google.com) and create a project.
-2. **APIs & Services → Library →** enable **YouTube Data API v3**.
-3. **APIs & Services → OAuth consent screen →** External, add yourself under *Test users*.
-   (A personal project stays in "Testing" mode; a test-user refresh token expires after 7 days.
-   Publishing the app removes that limit.)
-4. **APIs & Services → Credentials → Create credentials → OAuth client ID → Desktop app.**
-5. Copy the client ID and secret into `.env`:
+2. **APIs & Services → Library (Bibliothek) →** enable **YouTube Data API v3**.
+3. **Google Auth Platform → Get started (Erste Schritte).** The wizard asks for an app name, your
+   support email, the audience — choose **External (Extern)** — and a contact email.
+4. **Google Auth Platform → Audience (Zielgruppe) → Test users (Testnutzer):** add your own Google
+   address. Without this, sign-in fails with `access_denied`.
+5. **Google Auth Platform → Data access (Datenzugriff) → Add or remove scopes:** add
+   `.../auth/youtube.readonly` and `.../auth/youtube.force-ssl`, then save.
+6. **Google Auth Platform → Clients → Create client (Client erstellen) →** application type
+   **Desktop app (Desktop-App)**.
+7. Copy the client ID and secret into `.env`:
 
 ```bash
 cp .env.example .env
@@ -57,6 +64,14 @@ GOOGLE_CLIENT_SECRET=...
 ```
 
 Optionally add `YOUTUBE_API_KEY` so search works without signing in.
+
+Two things to expect, both normal for a personal project:
+
+- The consent screen warns that the app is **not verified**. Click *Advanced (Erweitert)* →
+  *Go to … (unsafe)*. Verification only matters for apps offered to other people.
+- While the app's publishing status is **Testing**, the refresh token expires after **7 days**, so
+  you have to re-run `npm run auth` weekly. Setting the status to **In production (In Produktion)**
+  under *Google Auth Platform → Audience* removes that limit; the unverified warning stays.
 
 ### 3. Sign in once
 
