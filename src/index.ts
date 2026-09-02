@@ -1,7 +1,9 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 
-dotenv.config({ path: path.join(__dirname, '..', '.env') });
+// quiet is not cosmetic: dotenv otherwise prints a banner to stdout, and stdout
+// carries the JSON-RPC stream. Any stray byte there breaks the MCP connection.
+dotenv.config({ path: path.join(__dirname, '..', '.env'), quiet: true });
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -21,6 +23,8 @@ import {
 import { hasStoredCredentials, tokenPath } from './auth.js';
 import {
   searchVideos,
+  listChannelUploads,
+  getSubscriptionFeed,
   getVideoDetails,
   listMySubscriptions,
   listMyPlaylists,
@@ -117,13 +121,62 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
       },
     },
     {
-      name: 'search_videos',
+      name: 'list_channel_uploads',
       description:
-        'Search YouTube for videos. Requires sign-in or YOUTUBE_API_KEY and consumes YouTube Data API quota.',
+        'List a channel\'s most recent uploads, newest first. Prefer this over search_videos whenever you ' +
+        'want "the latest videos from channel X" — it costs 1 quota unit instead of 100 and returns uploads ' +
+        'completely, including videos whose title does not contain any particular word.',
       inputSchema: {
         type: 'object',
         properties: {
-          query: { type: 'string', description: 'Search terms' },
+          channel: {
+            type: 'string',
+            description: 'Channel ID (UC...), uploads playlist ID (UU...), @handle, or channel URL',
+          },
+          max_results: { type: 'number', default: 10, description: '1-50' },
+          published_after: {
+            type: 'string',
+            description: 'ISO 8601 datetime; only return videos published at or after this moment',
+          },
+          page_token: { type: 'string', description: 'nextPageToken from a previous call' },
+        },
+        required: ['channel'],
+      },
+    },
+    {
+      name: 'get_subscription_feed',
+      description:
+        'Merged newest-first feed of recent uploads across the signed-in account\'s subscriptions — the ' +
+        '"what is new from the channels I follow" view. Requires sign-in. Results are cached, so repeated ' +
+        'calls are nearly free. Combine with get_transcript to summarize what is new.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          max_results: { type: 'number', default: 20, description: 'Videos in the merged result, 1-100' },
+          since: { type: 'string', description: 'ISO 8601 datetime; only videos published after this moment' },
+          per_channel: {
+            type: 'number',
+            default: 3,
+            description: 'Uploads fetched per channel before merging, 1-50',
+          },
+          channels: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Optional: restrict to these channels (IDs, @handles or URLs) instead of all subscriptions',
+          },
+        },
+      },
+    },
+    {
+      name: 'search_videos',
+      description:
+        'Full-text search across YouTube. Costs 100 quota units per call, so use list_channel_uploads ' +
+        'instead when you just want a channel\'s recent videos. Requires sign-in or YOUTUBE_API_KEY. ' +
+        'Passing channel_id without query is routed to the cheap uploads path automatically.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          query: { type: 'string', description: 'Search terms. Optional if channel_id is given.' },
           max_results: { type: 'number', default: 10, description: '1-50' },
           channel_id: { type: 'string', description: 'Restrict results to this channel' },
           published_after: { type: 'string', description: 'ISO 8601 datetime, e.g. 2026-01-01T00:00:00Z' },
@@ -133,7 +186,6 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
             default: 'relevance',
           },
         },
-        required: ['query'],
       },
     },
     {
@@ -311,9 +363,29 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return { content: [{ type: 'text', text: JSON.stringify(payload, null, 2) }] };
       }
 
+      case 'list_channel_uploads': {
+        const result = await listChannelUploads(
+          args!.channel as string,
+          (args!.max_results as number) ?? 10,
+          args!.published_after as string | undefined,
+          args!.page_token as string | undefined,
+        );
+        return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+      }
+
+      case 'get_subscription_feed': {
+        const result = await getSubscriptionFeed({
+          maxResults: args!.max_results as number | undefined,
+          since: args!.since as string | undefined,
+          perChannel: args!.per_channel as number | undefined,
+          channels: args!.channels as string[] | undefined,
+        });
+        return { content: [{ type: 'text', text: JSON.stringify(result, null, 2) }] };
+      }
+
       case 'search_videos': {
         const results = await searchVideos(
-          args!.query as string,
+          args!.query as string | undefined,
           (args!.max_results as number) ?? 10,
           args!.channel_id as string | undefined,
           args!.published_after as string | undefined,

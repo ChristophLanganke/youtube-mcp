@@ -13,7 +13,9 @@ quote it without you watching the video.
 | `get_transcript` | no | Transcript of any public video, as text / timestamps / SRT / VTT / JSON |
 | `list_transcript_languages` | no | Which caption tracks exist, auto vs human, translatable |
 | `get_video_info` | no | Title, channel, duration, description, view count |
-| `search_videos` | API key or sign-in | Search YouTube (uses API quota) |
+| `list_channel_uploads` | API key or sign-in | Recent uploads of any channel (ID, `@handle` or URL) — 1 quota unit |
+| `get_subscription_feed` | yes | Merged newest-first feed across all your subscriptions |
+| `search_videos` | API key or sign-in | Full-text search — 100 quota units |
 | `get_playlist_items` | public: API key | Videos in a playlist |
 | `get_auth_status` | no | What the server can currently do |
 | `list_my_subscriptions` | yes | Channels you follow |
@@ -24,6 +26,21 @@ quote it without you watching the video.
 
 Transcripts do **not** consume YouTube Data API quota — they come from the caption endpoint the
 player itself uses. Only the tools marked as using quota do.
+
+## Quota
+
+The daily budget is 10 000 units, and `search.list` costs 100 of them per call — 100 calls a day.
+Listing a channel's videos does not need search at all: every channel has an auto-maintained
+uploads playlist whose ID is the channel ID with `UC` swapped for `UU`, and `playlistItems.list`
+on it costs **1 unit** while returning uploads completely rather than best-effort.
+
+`get_subscription_feed` uses that: a feed over 120 subscriptions costs roughly 123 units instead of
+the 12 000 the search route would need — which would not fit in a day at all. Results are cached on
+disk (subscriptions 24 h, uploads 12 min), so a repeated feed call usually costs nothing, and dead
+channels are cached as failures so they are not re-requested on every call.
+
+`search_videos` stays for genuine full-text search. Calling it with `channel_id` but no `query` is
+routed to the cheap path automatically.
 
 ## Setup
 

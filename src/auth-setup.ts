@@ -5,7 +5,7 @@
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 
-dotenv.config({ path: path.join(__dirname, '..', '.env') });
+dotenv.config({ path: path.join(__dirname, '..', '.env'), quiet: true });
 
 import { runInteractiveLogin, logout, hasStoredCredentials, tokenPath, SCOPES } from './auth.js';
 import { getMyChannel } from './youtube-api.js';
