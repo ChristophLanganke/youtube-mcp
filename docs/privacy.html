@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy &middot; youtube-mcp</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Privacy Policy</h1>
+  <p class="lede">How youtube-mcp handles data from your Google Account.</p>
+  <p class="meta">Last updated: 10 September 2026</p>
+  <nav>
+    <a href="index.html">Overview</a>
+    <a href="terms.html">Terms of Service</a>
+  </nav>
+</header>
+
+<h2>1. Who is responsible</h2>
+<p>youtube-mcp is a personal, non-commercial open-source project by Christoph Langanke,
+reachable at <a href="mailto:christoph.langanke@googlemail.com">christoph.langanke@googlemail.com</a>.
+There is no company, no hosted service and no third-party operator behind it.</p>
+
+<h2>2. The essential point</h2>
+<div class="callout">
+  <p>youtube-mcp has no servers. It runs as a local process on your own computer, talks directly to
+  Google&rsquo;s APIs from there, and stores everything it keeps in your own home directory. The
+  developer never receives, sees or stores your data.</p>
+</div>
+
+<h2>3. What data is accessed</h2>
+<p>If &mdash; and only if &mdash; you choose to sign in with Google, the application requests the
+scopes <code>youtube.readonly</code> and <code>youtube.force-ssl</code>, and may read:</p>
+<ul>
+  <li>the list of channels your account subscribes to;</li>
+  <li>your own playlists and the videos in them;</li>
+  <li>the videos your own channel has uploaded;</li>
+  <li>caption tracks belonging to videos your own channel owns;</li>
+  <li>your channel&rsquo;s title and ID, to confirm which account is signed in.</li>
+</ul>
+<p>Transcripts and metadata of <em>public</em> videos are retrieved without any sign-in and involve
+no account data at all.</p>
+
+<h2>4. Where the data goes</h2>
+<table>
+  <tr><th>Item</th><th>Location</th><th>Lifetime</th></tr>
+  <tr>
+    <td>OAuth access &amp; refresh token</td>
+    <td><code>~/.youtube-mcp/token.json</code> on your machine, file mode <code>0600</code></td>
+    <td>Until you sign out or revoke access</td>
+  </tr>
+  <tr>
+    <td>Cached subscriptions and video lists</td>
+    <td><code>~/.youtube-mcp/cache.json</code> on your machine</td>
+    <td>Subscriptions 24&nbsp;h, uploads 12&nbsp;min, then refetched</td>
+  </tr>
+  <tr>
+    <td>Transcripts and video metadata</td>
+    <td>Held in memory for the duration of a request</td>
+    <td>Not written to disk</td>
+  </tr>
+</table>
+<p>Caching exists solely to stay within the YouTube Data API&rsquo;s daily quota. Nothing is
+transmitted to the developer or to any analytics, advertising or tracking service. No such service
+is integrated, and the application makes no network requests other than to Google&rsquo;s and
+YouTube&rsquo;s own endpoints.</p>
+
+<h2>5. Disclosure to your AI assistant</h2>
+<p>youtube-mcp is a Model Context Protocol server: its purpose is to answer questions asked by an
+MCP client, which is typically an AI assistant such as Claude Desktop. Whatever a tool returns
+&mdash; a transcript, a list of your subscriptions, your playlist contents &mdash; is therefore
+passed to that client, and, if the client is a cloud-based assistant, to that assistant&rsquo;s
+provider as part of the conversation.</p>
+<p>This is the intended function of the software rather than an incidental transfer, but you should
+be aware of it: the handling of that data is then governed by the privacy policy of the assistant
+you use, not by this one. Data is only ever passed on in response to a request you or your assistant
+initiate; nothing is sent proactively or in the background.</p>
+
+<h2>6. Google&rsquo;s Limited Use requirements</h2>
+<p>youtube-mcp&rsquo;s use of information received from Google APIs adheres to the
+<a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services
+User Data Policy</a>, including the Limited Use requirements. Specifically, data obtained through
+these scopes is used only to provide the features described on the
+<a href="index.html">overview page</a>, is never sold, is never used for advertising, and is never
+transferred to others except as described in section 5 above.</p>
+<p>The application is also subject to the
+<a href="https://www.youtube.com/t/terms">YouTube Terms of Service</a> and the
+<a href="https://policies.google.com/privacy">Google Privacy Policy</a>.</p>
+
+<h2>7. Your control over the data</h2>
+<ul>
+  <li><strong>Revoke access at any time</strong> at
+      <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.
+      The stored token becomes unusable immediately.</li>
+  <li><strong>Sign out locally</strong> with <code>npm run auth -- --logout</code>, which revokes the
+      token with Google and deletes it from disk.</li>
+  <li><strong>Erase everything</strong> by deleting the folder <code>~/.youtube-mcp/</code>. Since
+      this is the only place the application stores anything, that removes all retained data.</li>
+</ul>
+<p>Because no data reaches the developer, requests to access, correct or delete data held by the
+developer are not applicable &mdash; there is nothing on their side to act upon. You hold the only
+copy.</p>
+
+<h2>8. Children</h2>
+<p>The application is a developer tool and is not directed at children under 16.</p>
+
+<h2>9. Changes to this policy</h2>
+<p>If the application&rsquo;s data handling changes, this page is updated and the date at the top
+revised. Material changes to the scopes requested would additionally require you to grant consent
+again.</p>
+
+<footer>
+  <p>Questions about this policy:
+  <a href="mailto:christoph.langanke@googlemail.com">christoph.langanke@googlemail.com</a></p>
+</footer>
+
+</div>
+</body>
+</html>

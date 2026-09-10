@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>youtube-mcp</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>youtube-mcp</h1>
+  <p class="lede">A personal Model Context Protocol server that gives an AI assistant read-only
+  access to YouTube transcripts and to the operator&rsquo;s own YouTube account data.</p>
+  <nav>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="terms.html">Terms of Service</a>
+    <a href="https://github.com/ChristophLanganke/youtube-mcp">Source code</a>
+  </nav>
+</header>
+
+<h2>What it does</h2>
+<p>The server runs locally on the operator&rsquo;s own computer and is started by an MCP client such
+as Claude Desktop. It exposes a set of tools that let the assistant fetch a video&rsquo;s subtitle
+track as plain text &mdash; so a long video can be summarised, translated or quoted without watching
+it &mdash; and, after the operator signs in with Google, read their own subscriptions, playlists and
+uploads.</p>
+
+<table>
+  <tr><th>Tool</th><th>Sign-in required</th><th>Purpose</th></tr>
+  <tr><td><code>get_transcript</code></td><td>no</td><td>Transcript of any public video</td></tr>
+  <tr><td><code>list_transcript_languages</code></td><td>no</td><td>Available caption tracks</td></tr>
+  <tr><td><code>get_video_info</code></td><td>no</td><td>Title, channel, duration, description</td></tr>
+  <tr><td><code>list_channel_uploads</code></td><td>API key</td><td>Recent uploads of any channel</td></tr>
+  <tr><td><code>search_videos</code></td><td>API key</td><td>Full-text search</td></tr>
+  <tr><td><code>get_subscription_feed</code></td><td>yes</td><td>Newest videos across all subscriptions</td></tr>
+  <tr><td><code>list_my_subscriptions</code></td><td>yes</td><td>Channels the operator follows</td></tr>
+  <tr><td><code>list_my_playlists</code></td><td>yes</td><td>The operator&rsquo;s playlists</td></tr>
+  <tr><td><code>list_my_uploads</code></td><td>yes</td><td>Videos the operator uploaded</td></tr>
+  <tr><td><code>list_my_video_captions</code></td><td>yes</td><td>Caption tracks of the operator&rsquo;s own videos</td></tr>
+  <tr><td><code>download_my_caption</code></td><td>yes</td><td>Download an owned caption track</td></tr>
+</table>
+
+<h2>Scope of access</h2>
+<p>The application requests two Google OAuth scopes:</p>
+<ul>
+  <li><code>youtube.readonly</code> &mdash; read the signed-in account&rsquo;s subscriptions, playlists and uploads.</li>
+  <li><code>youtube.force-ssl</code> &mdash; required by the YouTube Data API for <code>captions.download</code>,
+      which can only retrieve caption tracks of videos the signed-in account owns.</li>
+</ul>
+
+<div class="callout">
+  <p>The application is <strong>read-only</strong>. No tool uploads, edits, deletes or publishes
+  anything on the connected YouTube account, and none is capable of doing so.</p>
+</div>
+
+<h2>Who runs it</h2>
+<p>This is a single-operator personal project, not a hosted service. There is no server, no user
+account system and no shared infrastructure &mdash; every installation runs entirely on the
+computer of the person who installed it, and their data never leaves that machine except in the
+requests they themselves initiate.</p>
+
+<footer>
+  <p>Operated by Christoph Langanke &middot;
+  <a href="mailto:christoph.langanke@googlemail.com">christoph.langanke@googlemail.com</a></p>
+</footer>
+
+</div>
+</body>
+</html>
