@@ -6,6 +6,21 @@ Built for the case "let Claude read/summarize this video": `get_transcript` pull
 track of any public video and hands it over as plain text, so Claude can summarize, translate or
 quote it without you watching the video.
 
+## What you need
+
+Most of what people install this for needs no Google account at all. The three tiers:
+
+| You want | You need |
+| --- | --- |
+| Transcripts, caption languages, video metadata | **Nothing.** Clone, `npm install && npm run build`, register with your MCP client |
+| Full-text search, a channel's uploads, public playlists | A Google account, a Cloud project and an **API key** — no OAuth, no consent screen |
+| Your own subscription feed, playlists, uploads and captions | The above plus the **OAuth sign-in** in step 3 |
+
+Transcripts come from the InnerTube endpoint the YouTube player itself uses, not from the YouTube
+Data API, which is why the first tier needs no credentials and consumes no quota. If summarising
+videos is all you are after, do step 1, then jump straight to step 4 — steps 2 and 3 do not apply
+to you.
+
 ## Capabilities
 
 | Tool | Needs sign-in | Purpose |
@@ -52,9 +67,11 @@ npm install
 npm run build
 ```
 
-At this point transcripts already work. Sign-in is only needed for the account tools.
+At this point transcripts already work — skip to step 4 and register the server with your MCP
+client. Steps 2 and 3 exist only for the Data API tools, and you need them only if you want search
+or your own account data.
 
-### 2. Google Cloud credentials (for account access)
+### 2. Google Cloud credentials (optional — for search and account access)
 
 The old "OAuth consent screen" page is gone — Google replaced it with the **Google Auth Platform**
 section. German console labels are given in parentheses.
@@ -63,6 +80,11 @@ section. German console labels are given in parentheses.
 2. **APIs & Services → Library (Bibliothek) →** enable **YouTube Data API v3**.
 3. **Google Auth Platform → Get started (Erste Schritte).** The wizard asks for an app name, your
    support email, the audience — choose **External (Extern)** — and a contact email.
+   The app name must not contain a Google trademark: anything with *YouTube*, *Google* or *Gmail*
+   in it is rejected, because the name would imply a partnership. The wizard still accepts such a
+   name, but every later attempt to save the branding form fails with *"Name der Anwendung
+   entspricht nicht den Anforderungen von Google"*. Pick a neutral name up front — the reference
+   deployment of this server is registered as **Langanke Media MCP**.
 4. **Google Auth Platform → Audience (Zielgruppe) → Test users (Testnutzer):** add your own Google
    address. Without this, sign-in fails with `access_denied`.
 5. **Google Auth Platform → Data access (Datenzugriff) → Add or remove scopes:** add
@@ -90,7 +112,31 @@ Two things to expect, both normal for a personal project:
   you have to re-run `npm run auth` weekly. Setting the status to **In production (In Produktion)**
   under *Google Auth Platform → Audience* removes that limit; the unverified warning stays.
 
-### 3. Sign in once
+Publishing to production is not just a button, though. *Audience → Publish app* stays greyed out
+until the **Branding** page is complete, and for scopes Google classes as sensitive — both YouTube
+scopes are — that means four fields that need real, reachable URLs on a domain you control:
+
+| Field | Example |
+| --- | --- |
+| Authorized domain (Autorisierte Domain) | `yourname.github.io` |
+| Application home page | `https://yourname.github.io/youtube-mcp/` |
+| Privacy policy link | `https://yourname.github.io/youtube-mcp/privacy.html` |
+| Terms of service link | `https://yourname.github.io/youtube-mcp/terms.html` |
+
+`localhost` and file paths are rejected, and so is a bare `github.io` — that one is on the Public
+Suffix List, so the authorized domain has to be the full host including your user name.
+
+The cheapest way to get those URLs is to fork this repository: [`docs/`](docs/) already contains a
+home page, a privacy policy and terms of service. Enable **Settings → Pages → Deploy from a branch
+→ main → /docs** on your fork, wait for the first build, then adjust the operator name, the contact
+address and the app name in those three files to your own. Publishing to production also makes the
+test-user list irrelevant: anyone with a Google account can then consent — though only if they have
+your client ID and secret, which stay in your local `.env`.
+
+### 3. Sign in once (optional — only for your own account data)
+
+An API key from step 2 already covers search and public playlists. Sign in only if you want the
+tools that read your own subscriptions, playlists, uploads or captions.
 
 ```bash
 npm run auth
