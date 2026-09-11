@@ -62,7 +62,8 @@ routed to the cheap path automatically.
 ### 1. Install and build
 
 ```bash
-cd ~/Repos/youtube-mcp
+git clone https://github.com/ChristophLanganke/youtube-mcp.git
+cd youtube-mcp
 npm install
 npm run build
 ```
@@ -151,22 +152,33 @@ Sign out again with:
 npm run auth -- --logout
 ```
 
-### 4. Register with Claude Desktop
+### 4. Register with your MCP client
 
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+Requires Node 20 or newer. For Claude Desktop, add the server to
+`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS, or to
+`%APPDATA%\Claude\claude_desktop_config.json` on Windows:
 
 ```json
 {
   "mcpServers": {
     "youtube": {
       "command": "node",
-      "args": ["/Users/christophlanganke/Repos/youtube-mcp/dist/index.js"]
+      "args": ["/absolute/path/to/youtube-mcp/dist/index.js"]
     }
   }
 }
 ```
 
-Then restart Claude Desktop.
+The path must be absolute and must point at the built `dist/index.js`, not at `src/`. On Windows,
+write the path with escaped backslashes (`C:\\Users\\you\\youtube-mcp\\dist\\index.js`) or with
+forward slashes. Then restart Claude Desktop.
+
+Any other MCP client works the same way — the server speaks MCP over stdio and is started with
+`node dist/index.js`. In Claude Code, for example:
+
+```bash
+claude mcp add youtube -- node /absolute/path/to/youtube-mcp/dist/index.js
+```
 
 ## Usage examples
 
@@ -212,3 +224,8 @@ If all three fail, the video is usually private, age-restricted, region-blocked 
   restriction. Use `get_transcript` for third-party videos.
 - YouTube rate-limits the caption endpoint (HTTP 429) if hit rapidly in a loop.
 - Search and playlist tools share the default 10 000 units/day API quota; a search costs 100.
+
+## License
+
+ISC — see [LICENSE](LICENSE). The transcripts and video metadata this server retrieves are not
+covered by it; they belong to the rights holders of the respective videos.

@@ -12,6 +12,9 @@
   "keywords": [],
   "author": "Christoph Langanke",
   "license": "ISC",
+  "engines": {
+    "node": ">=20"
+  },
   "type": "commonjs",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
