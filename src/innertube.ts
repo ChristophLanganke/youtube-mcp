@@ -14,6 +14,19 @@ interface InnertubeClient {
   client: Record<string, unknown>;
 }
 
+/**
+ * The `key` values below are NOT credentials of this project and must not be
+ * treated as such. They are the InnerTube API keys Google ships inside the
+ * YouTube Android and iOS apps: identical in every installation worldwide,
+ * published in every teardown of those apps, and required for the endpoint to
+ * answer at all. They belong to no Google Cloud project of ours, consume none
+ * of our Data API quota, and cannot be rotated or revoked by us.
+ *
+ * Secret scanners flag them on sight, because the `AIza…` prefix marks a live
+ * Google API key and these keys are, of course, live. Such an alert is a false
+ * positive: replacing them would only break transcript retrieval. The real
+ * credentials of this project live in `.env`, which is git-ignored.
+ */
 const CLIENTS: InnertubeClient[] = [
   {
     label: 'ANDROID',
